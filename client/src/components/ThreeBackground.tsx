@@ -36,34 +36,41 @@ export function ThreeBackground() {
     };
   }, []);
   
-  // Generate stars
+  // Generate much more subtle stars with softer appearance
   const generateStars = (count: number) => {
     const stars = [];
     
     for (let i = 0; i < count; i++) {
-      const size = Math.random() * 3 + 1;
-      const delay = Math.random() * 10;
-      const duration = Math.random() * 100 + 50;
+      // Much smaller stars
+      const size = Math.random() * 1.5 + 0.5;
+      
+      // Longer animation intervals for less distracting twinkling
+      const delay = Math.random() * 15;
+      const duration = Math.random() * 150 + 100; // Much slower twinkle
+      
       const x = Math.random() * 100;
       const y = Math.random() * 100;
-      const opacity = Math.random() * 0.7 + 0.3;
+      
+      // Much lower opacity for subtle effect
+      const opacity = Math.random() * 0.2 + 0.1;
       
       stars.push(
         <div
           key={i}
-          className="absolute rounded-full animate-twinkle"
+          className="absolute rounded-full"
           style={{
             width: `${size}px`,
             height: `${size}px`,
             left: `${x}%`,
             top: `${y}%`,
-            backgroundColor: theme === "dark" ? "#ffffff" : "#3b82f6",
+            backgroundColor: theme === "dark" ? "#f8f9fa" : "#3b82f6",
             opacity,
+            // Reduced glow effect with much smaller, softer shadow
             boxShadow: theme === "dark" 
-              ? `0 0 ${size * 2}px ${size / 2}px rgba(255, 255, 255, ${opacity * 0.5})`
-              : `0 0 ${size * 2}px ${size / 2}px rgba(59, 130, 246, ${opacity * 0.5})`,
-            animationDelay: `${delay}s`,
-            animationDuration: `${duration}s`
+              ? `0 0 ${size}px ${size / 3}px rgba(255, 255, 255, ${opacity * 0.2})`
+              : `0 0 ${size}px ${size / 3}px rgba(59, 130, 246, ${opacity * 0.2})`,
+            animation: `subtleTwinkle ${duration}s infinite ease-in-out`,
+            animationDelay: `${delay}s`
           }}
         />
       );
@@ -96,21 +103,22 @@ export function ThreeBackground() {
       // Lower opacity for subtler effect
       const opacity = Math.random() * 0.08 + 0.02;
       
-      // Reduced parallax factor for less extreme movement
-      const parallaxFactor = Math.random() * 0.025 + 0.005;
+      // Extremely reduced parallax factor for minimal, subtle movement
+      const parallaxFactor = Math.random() * 0.01 + 0.002;
       
-      // Use motion.div for smoother animations
+      // Use motion.div for ultra-smooth animations with minimal movement
       const commonProps = {
         initial: { opacity: 0 },
         animate: { 
           opacity,
-          x: mousePosition.x * parallaxFactor * 50, // reduced movement
-          y: mousePosition.y * parallaxFactor * 50  // reduced movement
+          x: mousePosition.x * parallaxFactor * 30, // highly reduced movement
+          y: mousePosition.y * parallaxFactor * 30  // highly reduced movement
         },
         transition: {
-          opacity: { duration: 1 },
-          x: { type: "spring", stiffness: 10, damping: 20 },
-          y: { type: "spring", stiffness: 10, damping: 20 }
+          opacity: { duration: 1.5 },
+          // Much slower spring with high damping for professional, subtle motion
+          x: { type: "spring", stiffness: 5, damping: 25 },
+          y: { type: "spring", stiffness: 5, damping: 25 }
         }
       };
       
@@ -189,29 +197,29 @@ export function ThreeBackground() {
     return objects;
   };
 
-  // Mouse follower with much smoother movement
+  // Ultra-subtle mouse follower with minimal visual impact
   const MouseFollower = () => {
     return (
       <motion.div
-        className="fixed w-8 h-8 rounded-full pointer-events-none z-10"
+        className="fixed w-6 h-6 rounded-full pointer-events-none z-10"
         animate={{
           // Calculate position more accurately based on our adjusted mouse coordinates
           // The +0.5 helps center it since our mousePosition is now -0.25 to 0.25 range
           left: `calc(${(mousePosition.x + 0.5) * 100}%)`,
           top: `calc(${(mousePosition.y + 0.5) * 100}%)`,
-          opacity: 0.7,
-          scale: [1, 1.1, 1],
+          opacity: 0.35, // Much lower opacity for subtlety
+          scale: [1, 1.05, 1], // Almost imperceptible pulse
         }}
         transition={{
-          left: { type: "spring", stiffness: 50, damping: 30 }, // More dampening for smoother feel
-          top: { type: "spring", stiffness: 50, damping: 30 },
-          scale: { duration: 2, repeat: Infinity }, // Slower pulse
+          left: { type: "spring", stiffness: 40, damping: 35 }, // Even more dampening for smoother feel
+          top: { type: "spring", stiffness: 40, damping: 35 },
+          scale: { duration: 3, repeat: Infinity }, // Very slow, gentle pulse
         }}
         style={{
           translateX: "-50%", // Center the element on cursor
           translateY: "-50%",
-          background: `radial-gradient(circle, ${theme === "dark" ? "#3b82f6" : "#3b82f6"} 0%, transparent 70%)`,
-          boxShadow: `0 0 20px 10px ${theme === "dark" ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.2)"}`,
+          background: `radial-gradient(circle, ${theme === "dark" ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.3)"} 0%, transparent 80%)`,
+          boxShadow: `0 0 15px 5px ${theme === "dark" ? "rgba(59, 130, 246, 0.05)" : "rgba(59, 130, 246, 0.05)"}`,
         }}
       />
     );
@@ -237,14 +245,14 @@ export function ThreeBackground() {
       style={backgroundStyles}
       onMouseMove={handleMouseMove}
     >
-      {/* Layer with stars - fewer for better performance */}
+      {/* Layer with stars - very minimal for a clean, subtle effect */}
       <div className="stars-container absolute inset-0">
-        {generateStars(80)}
+        {generateStars(40)}
       </div>
       
-      {/* Layer with floating shapes - fewer for better performance */}
+      {/* Layer with floating shapes - minimal count for subtle professional effect */}
       <div className="shapes-container absolute inset-0">
-        {generateFloatingObjects(12)}
+        {generateFloatingObjects(8)}
       </div>
       
       {/* Mouse follower effect */}
