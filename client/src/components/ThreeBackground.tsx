@@ -9,12 +9,20 @@ export function ThreeBackground() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const backgroundRef = useRef<HTMLDivElement>(null);
   
-  // Handle mouse move for parallax effect
+  // Handle mouse move for parallax effect with smooth transition
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement> | MouseEvent) => {
     const { clientX, clientY } = e;
-    const x = (clientX / window.innerWidth) * 2 - 1;
-    const y = (clientY / window.innerHeight) * 2 - 1;
-    setMousePosition({ x, y });
+    // Reduce sensitivity by multiplying by smaller values (0.5 instead of 2)
+    const x = (clientX / window.innerWidth - 0.5) * 0.5;
+    const y = (clientY / window.innerHeight - 0.5) * 0.5;
+    
+    // Use smooth transition with requestAnimationFrame
+    requestAnimationFrame(() => {
+      setMousePosition(prev => ({
+        x: prev.x + (x - prev.x) * 0.05, // Apply easing for smoother movement
+        y: prev.y + (y - prev.y) * 0.05
+      }));
+    });
   };
   
   useEffect(() => {
@@ -64,7 +72,7 @@ export function ThreeBackground() {
     return stars;
   };
   
-  // Generate floating objects
+  // Generate floating objects with improved smoothness
   const generateFloatingObjects = (count: number) => {
     const objects = [];
     const shapes = ["circle", "square", "triangle"];
@@ -73,20 +81,45 @@ export function ThreeBackground() {
     for (let i = 0; i < count; i++) {
       const shape = shapes[Math.floor(Math.random() * shapes.length)];
       const color = colors[Math.floor(Math.random() * colors.length)];
-      const size = Math.random() * 60 + 20;
-      const x = Math.random() * 100;
-      const y = Math.random() * 100;
-      const duration = Math.random() * 20 + 10;
+      
+      // Use smaller sizes for better performance
+      const size = Math.random() * 40 + 10;
+      
+      // Better distribute elements across the screen
+      const x = Math.random() * 90 + 5; // keep away from extreme edges
+      const y = Math.random() * 90 + 5; // keep away from extreme edges
+      
+      // Slower animations for gentler movement
+      const duration = Math.random() * 30 + 20;
       const delay = Math.random() * 5;
-      const opacity = Math.random() * 0.12 + 0.03;
-      const parallaxFactor = Math.random() * 0.05 + 0.02;
+      
+      // Lower opacity for subtler effect
+      const opacity = Math.random() * 0.08 + 0.02;
+      
+      // Reduced parallax factor for less extreme movement
+      const parallaxFactor = Math.random() * 0.025 + 0.005;
+      
+      // Use motion.div for smoother animations
+      const commonProps = {
+        initial: { opacity: 0 },
+        animate: { 
+          opacity,
+          x: mousePosition.x * parallaxFactor * 50, // reduced movement
+          y: mousePosition.y * parallaxFactor * 50  // reduced movement
+        },
+        transition: {
+          opacity: { duration: 1 },
+          x: { type: "spring", stiffness: 10, damping: 20 },
+          y: { type: "spring", stiffness: 10, damping: 20 }
+        }
+      };
       
       let shapeElement;
       
-      // Create different shapes
+      // Create different shapes with more subtle animation
       if (shape === "circle") {
         shapeElement = (
-          <div
+          <motion.div
             key={i}
             className="absolute rounded-full pointer-events-none"
             style={{
@@ -95,17 +128,18 @@ export function ThreeBackground() {
               left: `${x}%`,
               top: `${y}%`,
               backgroundColor: color,
-              opacity,
-              transform: `translate(${mousePosition.x * parallaxFactor * 100}px, ${mousePosition.y * parallaxFactor * 100}px)`,
-              transition: "transform 0.2s ease-out",
-              animation: `float ${duration}s infinite ease-in-out`,
+              animationName: "float",
+              animationDuration: `${duration}s`,
+              animationTimingFunction: "ease-in-out",
+              animationIterationCount: "infinite",
               animationDelay: `${delay}s`,
             }}
+            {...commonProps}
           />
         );
       } else if (shape === "square") {
         shapeElement = (
-          <div
+          <motion.div
             key={i}
             className="absolute rounded-md pointer-events-none"
             style={{
@@ -114,18 +148,20 @@ export function ThreeBackground() {
               left: `${x}%`,
               top: `${y}%`,
               backgroundColor: color,
-              opacity,
-              transform: `translate(${mousePosition.x * parallaxFactor * 100}px, ${mousePosition.y * parallaxFactor * 100}px) rotate(${Math.random() * 360}deg)`,
-              transition: "transform 0.2s ease-out",
-              animation: `floatRotate ${duration}s infinite ease-in-out`,
+              animationName: "floatRotate",
+              animationDuration: `${duration}s`,
+              animationTimingFunction: "ease-in-out",
+              animationIterationCount: "infinite",
               animationDelay: `${delay}s`,
+              rotate: Math.random() * 45 // less rotation
             }}
+            {...commonProps}
           />
         );
       } else {
         // Triangle using clip-path
         shapeElement = (
-          <div
+          <motion.div
             key={i}
             className="absolute pointer-events-none"
             style={{
@@ -134,13 +170,15 @@ export function ThreeBackground() {
               left: `${x}%`,
               top: `${y}%`,
               backgroundColor: color,
-              opacity,
               clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
-              transform: `translate(${mousePosition.x * parallaxFactor * 100}px, ${mousePosition.y * parallaxFactor * 100}px) rotate(${Math.random() * 360}deg)`,
-              transition: "transform 0.2s ease-out",
-              animation: `floatRotate ${duration}s infinite ease-in-out`,
+              animationName: "floatRotate",
+              animationDuration: `${duration}s`,
+              animationTimingFunction: "ease-in-out",
+              animationIterationCount: "infinite",
               animationDelay: `${delay}s`,
+              rotate: Math.random() * 30 // less rotation
             }}
+            {...commonProps}
           />
         );
       }
@@ -151,25 +189,29 @@ export function ThreeBackground() {
     return objects;
   };
 
-  // Mouse follower
+  // Mouse follower with much smoother movement
   const MouseFollower = () => {
     return (
       <motion.div
         className="fixed w-8 h-8 rounded-full pointer-events-none z-10"
         animate={{
-          x: mousePosition.x * 10 + window.innerWidth / 2,
-          y: mousePosition.y * 10 + window.innerHeight / 2,
+          // Calculate position more accurately based on our adjusted mouse coordinates
+          // The +0.5 helps center it since our mousePosition is now -0.25 to 0.25 range
+          left: `calc(${(mousePosition.x + 0.5) * 100}%)`,
+          top: `calc(${(mousePosition.y + 0.5) * 100}%)`,
           opacity: 0.7,
-          scale: [1, 1.2, 1],
+          scale: [1, 1.1, 1],
         }}
         transition={{
-          x: { type: "spring", stiffness: 100, damping: 20 },
-          y: { type: "spring", stiffness: 100, damping: 20 },
-          scale: { duration: 1.5, repeat: Infinity },
+          left: { type: "spring", stiffness: 50, damping: 30 }, // More dampening for smoother feel
+          top: { type: "spring", stiffness: 50, damping: 30 },
+          scale: { duration: 2, repeat: Infinity }, // Slower pulse
         }}
         style={{
+          translateX: "-50%", // Center the element on cursor
+          translateY: "-50%",
           background: `radial-gradient(circle, ${theme === "dark" ? "#3b82f6" : "#3b82f6"} 0%, transparent 70%)`,
-          boxShadow: `0 0 20px 10px ${theme === "dark" ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.3)"}`,
+          boxShadow: `0 0 20px 10px ${theme === "dark" ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.2)"}`,
         }}
       />
     );
@@ -195,14 +237,14 @@ export function ThreeBackground() {
       style={backgroundStyles}
       onMouseMove={handleMouseMove}
     >
-      {/* Layer with stars */}
+      {/* Layer with stars - fewer for better performance */}
       <div className="stars-container absolute inset-0">
-        {generateStars(150)}
+        {generateStars(80)}
       </div>
       
-      {/* Layer with floating shapes */}
+      {/* Layer with floating shapes - fewer for better performance */}
       <div className="shapes-container absolute inset-0">
-        {generateFloatingObjects(20)}
+        {generateFloatingObjects(12)}
       </div>
       
       {/* Mouse follower effect */}
